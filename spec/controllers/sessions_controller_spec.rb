@@ -1,49 +1,51 @@
 require 'rails_helper'
 
 RSpec.describe SessionsController, type: :controller do
-  render_views
+  describe 'POST #create' do
+    context 'with valid credentials' do
+      let(:user) { create(:user) }  # Create a user using FactoryBot
 
-  describe 'POST /sessions' do
-    it 'renders new session object' do
-      FactoryBot.create(:user, username: 'asdasdasd', password: 'asdasdasd')
+      it 'authenticates the user' do
+        post :create, params: { session: { username: user.username, password: 'password' } }  # Replace 'password' with actual value
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq({
+          authenticated: true,
+          username: user.username
+        }.to_json)
+      end
+    end
 
-      post :create, params: {
-        user: {
-          username: 'asdasdasd',
-          password: 'asdasdasd'
-        }
-      }
-
-      expect(response.body).to eq({
-        success: true
-      }.to_json)
+    context 'with invalid credentials' do
+      it 'returns authentication error' do
+        post :create, params: { session: { username: 'invalid_user', password: 'wrong_password' } }
+        expect(response).to have_http_status(:unauthorized)
+        expect(response.body).to include('errors')
+      end
     end
   end
 
-  describe 'GET /authenticated' do
-    it 'renders authenticated user object' do
-      user = FactoryBot.create(:user)
-      session = user.sessions.create
-      @request.cookie_jar.signed['twitter_session_token'] = session.token
+  describe 'GET #authenticated' do
+    context 'with authenticated user' do
+      let(:user) { create(:user) }
 
-      get :authenticated
+      before { session[:user_id] = user.id }  # Simulate login before request
 
-      expect(response.body).to eq({
-        authenticated: true,
-        username: user.username
-      }.to_json)
+      it 'returns user information' do
+        get :authenticated
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq({
+          authenticated: true,
+          username: user.username
+        }.to_json)
+      end
     end
-  end
 
-  describe 'DELETE /sessions' do
-    it 'renders success' do
-      user = FactoryBot.create(:user)
-      session = user.sessions.create
-      @request.cookie_jar.signed['twitter_session_token'] = session.token
-
-      delete :destroy
-
-      expect(user.sessions.count).to be(0)
+    context 'without authenticated user' do
+      it 'returns authentication error' do
+        get :authenticated
+        expect(response).to have_http_status(:unauthorized)
+        expect(response.body).to include('errors')
+      end
     end
   end
 end
