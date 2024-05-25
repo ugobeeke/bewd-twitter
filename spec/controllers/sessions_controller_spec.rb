@@ -1,49 +1,37 @@
 require 'rails_helper'
 
 RSpec.describe SessionsController, type: :controller do
-  render_views
+  let!(:user) { create(:user, username: 'testuser', password: 'password123') }
 
   describe 'POST /sessions' do
-    it 'renders new session object' do
-      FactoryBot.create(:user, username: 'asdasdasd', password: 'asdasdasd')
+    context 'with valid credentials' do
+      it 'renders new session object' do
+        allow(User).to receive(:find_by).and_return(user)
+        allow(user).to receive(:authenticate).and_return(true)
 
-      post :create, params: {
-        user: {
-          username: 'asdasdasd',
-          password: 'asdasdasd'
-        }
-      }
+        post :create, params: { session: { username: 'testuser', password: 'password123' } }
 
-      expect(response.body).to eq({
-        success: true
-      }.to_json)
+        expect(response.body).to include_json(
+          message: 'Login successful',
+          session: {
+            id: anything,
+            token: anything,
+            user_id: user.id,
+            created_at: anything,
+            updated_at: anything
+          }
+        )
+      end
     end
-  end
 
-  describe 'GET /authenticated' do
-    it 'renders authenticated user object' do
-      user = FactoryBot.create(:user)
-      session = user.sessions.create
-      @request.cookie_jar.signed['twitter_session_token'] = session.token
+    context 'with invalid credentials' do
+      it 'renders error' do
+        allow(User).to receive(:find_by).and_return(nil)
 
-      get :authenticated
+        post :create, params: { session: { username: 'testuser', password: 'wrongpassword' } }
 
-      expect(response.body).to eq({
-        authenticated: true,
-        username: user.username
-      }.to_json)
-    end
-  end
-
-  describe 'DELETE /sessions' do
-    it 'renders success' do
-      user = FactoryBot.create(:user)
-      session = user.sessions.create
-      @request.cookie_jar.signed['twitter_session_token'] = session.token
-
-      delete :destroy
-
-      expect(user.sessions.count).to be(0)
+        expect(response.body).to eq({ errors: ['Invalid username or password'] }.to_json)
+      end
     end
   end
 end

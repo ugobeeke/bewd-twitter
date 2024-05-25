@@ -27,6 +27,7 @@ gem 'jbuilder', '~> 2.11'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 
+
 # AWS S3
 gem 'aws-sdk-s3', '~> 1.114'
 # Webrick
@@ -46,6 +47,7 @@ gem 'bootsnap', '>= 1.13', require: false
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', '~> 11.1.3', platforms: %i[mri mingw x64_mingw]
+  gem 'rspec-json_matcher'
 
   # Added by Altcademy.com
   gem 'awesome_print', '~> 1.9'
@@ -55,6 +57,7 @@ group :development, :test do
   gem 'rspec-rails', '~> 5.1'
   gem 'rubocop', '~> 1.36'
   gem 'rubocop-rspec', '2.12'
+  
 end
 
 group :development do
