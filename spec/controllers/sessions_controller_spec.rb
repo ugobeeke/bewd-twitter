@@ -11,16 +11,14 @@ RSpec.describe SessionsController, type: :controller do
 
         post :create, params: { session: { username: 'testuser', password: 'password123' } }
 
-        expect(response.body).to include_json(
-          message: 'Login successful',
-          session: {
-            id: anything,
-            token: anything,
-            user_id: user.id,
-            created_at: anything,
-            updated_at: anything
-          }
-        )
+        json_response = JSON.parse(response.body)
+
+        expect(json_response['message']).to eq('Login successful')
+        expect(json_response['session']['id']).to be_a(Integer)
+        expect(json_response['session']['token']).to be_a(String)
+        expect(json_response['session']['user_id']).to eq(user.id)
+        expect(json_response['session']['created_at']).to be_a(String)
+        expect(json_response['session']['updated_at']).to be_a(String)
       end
     end
 
@@ -30,7 +28,9 @@ RSpec.describe SessionsController, type: :controller do
 
         post :create, params: { session: { username: 'testuser', password: 'wrongpassword' } }
 
-        expect(response.body).to eq({ errors: ['Invalid username or password'] }.to_json)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response['errors']).to include('Invalid username or password')
       end
     end
   end

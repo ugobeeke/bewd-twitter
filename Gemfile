@@ -26,6 +26,9 @@ gem 'jbuilder', '~> 2.11'
 # gem 'redis', '~> 4.0'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
+gem 'rspec-json_matcher'
+gem 'rspec-json_expectations'
+
 
 
 # AWS S3
@@ -47,7 +50,7 @@ gem 'bootsnap', '>= 1.13', require: false
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', '~> 11.1.3', platforms: %i[mri mingw x64_mingw]
-  gem 'rspec-json_matcher'
+  
 
   # Added by Altcademy.com
   gem 'awesome_print', '~> 1.9'
